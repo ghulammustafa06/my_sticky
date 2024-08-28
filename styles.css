@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Shadows+Into+Light&display=swap');
+
+:root {
+    --primary-color: #4a4a4a;
+    --secondary-color: #ffd700;
+    --bg-color: #f0f0f0;
+    --note-color: #fff700;
+}
 
 * {
     margin: 0;
@@ -8,65 +15,86 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--primary-color);
 }
 
 header {
-    background-color: #4a4a4a;
+    background-color: var(--primary-color);
     color: white;
     padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 600;
+    font-family: 'Shadows Into Light', cursive;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+
+#search-notes {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
 }
 
 #create-note {
-    background-color: #ffd700;
-    color: #333;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
     border: none;
     padding: 0.5rem 1rem;
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    border-radius: 5px;
 }
 
 #create-note:hover {
     background-color: #ffea00;
+    transform: scale(1.05);
 }
 
 #notes-container {
     display: flex;
     flex-wrap: wrap;
     padding: 2rem;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .note {
-    width: 200px;
-    min-height: 200px;
-    background-color: #fff700;
-    padding: 1rem;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    min-height: 250px;
+    background-color: var(--note-color);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     position: relative;
+    transition: all 0.3s ease;
+}
+
+.note:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
 }
 
 .note-content {
     flex-grow: 1;
     margin-bottom: 1rem;
-}
-
-.note-actions {
-    display: flex;
-    justify-content: space-between;
+    font-family: 'Shadows Into Light', cursive;
+    font-size: 1.2rem;
+    line-height: 1.6;
 }
 
 .note-actions button {

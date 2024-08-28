@@ -10,9 +10,23 @@
 <body>
     <header>
         <h1>My Sticky</h1>
-        <button id="create-note"><i class="fas fa-plus"></i> New Note</button>
+        <div class="header-actions">
+            <input type="text" id="search-notes" placeholder="Search notes...">
+            <button id="create-note"><i class="fas fa-plus"></i> New Note</button>
+        </div>
     </header>
     <main id="notes-container"></main>
+    <div id="templates-modal" class="modal">
+        <div class="modal-content">
+            <h2>Choose a Template</h2>
+            <div class="template-options">
+                <div class="template" data-template="todo">To-Do List</div>
+                <div class="template" data-template="meeting">Meeting Notes</div>
+                <div class="template" data-template="idea">Idea Brainstorm</div>
+            </div>
+            <button id="close-modal">Close</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
