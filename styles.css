@@ -39,3 +39,45 @@ h1 {
 #create-note:hover {
     background-color: #ffea00;
 }
+
+#notes-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.note {
+    width: 200px;
+    min-height: 200px;
+    background-color: #fff700;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.note-content {
+    flex-grow: 1;
+    margin-bottom: 1rem;
+}
+
+.note-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.note-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #4a4a4a;
+    transition: color 0.3s ease;
+}
+
+.note-actions button:hover {
+    color: #333;
+}
