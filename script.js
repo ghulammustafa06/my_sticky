@@ -35,10 +35,12 @@ function createNote(content = '', color = '#fff700', x = 0, y = 0, template = ''
     
     note.style.animation = 'fadeIn 0.5s';
 
+    // Make the note draggable
     note.draggable = true;
     note.addEventListener('dragstart', dragStart);
     note.addEventListener('dragend', dragEnd);
 
+    // Add event listeners for editing, color change, formatting, and deletion
     const noteContent = note.querySelector('.note-content');
     const colorChangeButton = note.querySelector('.color-change');
     const formatButton = note.querySelector('.format-note');
@@ -102,8 +104,66 @@ function formatNote(noteContent) {
     saveNotes();
 }
 
+function deleteNote(note) {
+    note.style.animation = 'fadeOut 0.5s';
+    setTimeout(() => {
+        note.remove();
+        saveNotes();
+    }, 500);
+}
+
+function dragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.id);
+    setTimeout(() => (e.target.style.opacity = '0.5'), 0);
+}
+
+function dragEnd(e) {
+    e.target.style.opacity = '1';
+    e.target.style.left = `${e.clientX - e.target.offsetWidth / 2}px`;
+    e.target.style.top = `${e.clientY - e.target.offsetHeight / 2}px`;
+    saveNotes();
+}
+
+function saveNotes() {
+    const notesData = Array.from(document.querySelectorAll('.note')).map(note => ({
+        content: note.querySelector('.note-content').innerHTML,
+        color: note.style.backgroundColor,
+        x: parseInt(note.style.left, 10),
+        y: parseInt(note.style.top, 10)
+    }));
+    localStorage.setItem('notes', JSON.stringify(notesData));
+}
+
 function loadNotes() {
     notes.forEach(note => createNote(note.content, note.color, note.x, note.y));
 }
 
+searchInput.addEventListener('input', () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    document.querySelectorAll('.note').forEach(note => {
+        const noteContent = note.querySelector('.note-content').textContent.toLowerCase();
+        note.style.display = noteContent.includes(searchTerm) ? 'flex' : 'none';
+    });
+});
+
 loadNotes();
+
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        showTemplatesModal();
+    }
+});
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(20px); }
+    }
+`;
+document.head.appendChild(style);
