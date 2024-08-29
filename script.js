@@ -1,17 +1,22 @@
 const notesContainer = document.getElementById('notes-container');
 const createNoteButton = document.getElementById('create-note');
 const searchInput = document.getElementById('search-notes');
+const categoryFilter = document.getElementById('category-filter');
 const templatesModal = document.getElementById('templates-modal');
 const closeModalButton = document.getElementById('close-modal');
+const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
+let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-function createNote(content = '', color = '#fff700', x = 0, y = 0, template = '') {
+function createNote(content = '', color = '#fff700', x = 0, y = 0, template = '', category = '', width = '250px', height = '250px') {
     const note = document.createElement('div');
     note.className = 'note';
     note.style.backgroundColor = color;
     note.style.left = `${x}px`;
     note.style.top = `${y}px`;
+    note.style.width = width;
+    note.style.height = height;
 
     let templateContent = '';
     if (template === 'todo') {
@@ -27,28 +32,33 @@ function createNote(content = '', color = '#fff700', x = 0, y = 0, template = ''
         <div class="note-actions">
             <button class="color-change"><i class="fas fa-palette"></i></button>
             <button class="format-note"><i class="fas fa-font"></i></button>
+            <button class="change-category"><i class="fas fa-tag"></i></button>
             <button class="delete-note"><i class="fas fa-trash"></i></button>
         </div>
+        <div class="category-tag category-${category}">${category}</div>
     `;
 
     notesContainer.appendChild(note);
     
     note.style.animation = 'fadeIn 0.5s';
 
-    // Make the note draggable
     note.draggable = true;
     note.addEventListener('dragstart', dragStart);
     note.addEventListener('dragend', dragEnd);
 
-    // Add event listeners for editing, color change, formatting, and deletion
+    note.style.resize = 'both';
+    note.style.overflow = 'auto';
+
     const noteContent = note.querySelector('.note-content');
     const colorChangeButton = note.querySelector('.color-change');
     const formatButton = note.querySelector('.format-note');
+    const changeCategoryButton = note.querySelector('.change-category');
     const deleteButton = note.querySelector('.delete-note');
 
     noteContent.addEventListener('input', saveNotes);
     colorChangeButton.addEventListener('click', () => changeColor(note));
-    formatButton.addEventListener('click', () => formatNote(noteContent));
+    formatButton.addEventListener('click', () => showFormatOptions(noteContent));
+    changeCategoryButton.addEventListener('click', () => changeCategory(note));
     deleteButton.addEventListener('click', () => deleteNote(note));
 
     saveNotes();
@@ -66,7 +76,7 @@ closeModalButton.addEventListener('click', () => {
 
 document.querySelectorAll('.template').forEach(template => {
     template.addEventListener('click', () => {
-        createNote('', '#fff700', 0, 0, template.dataset.template);
+        createNote('', '#fff700', 0, 0, template.dataset.template, 'work');
         templatesModal.style.display = 'none';
     });
 });
@@ -83,24 +93,36 @@ function changeColor(note) {
     });
 }
 
-function formatNote(noteContent) {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const selectedText = range.toString();
+function showFormatOptions(noteContent) {
+    const formatOptions = ['bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript'];
+    const formatMenu = document.createElement('div');
+    formatMenu.className = 'format-menu';
+    formatMenu.style.position = 'absolute';
+    formatMenu.style.backgroundColor = 'var(--bg-color)';
+    formatMenu.style.border = '1px solid var(--primary-color)';
+    formatMenu.style.borderRadius = '5px';
+    formatMenu.style.padding = '5px';
 
-        if (selectedText) {
-            const formatOptions = ['bold', 'italic', 'underline'];
-            const randomFormat = formatOptions[Math.floor(Math.random() * formatOptions.length)];
-            
-            const formattedText = document.createElement('span');
-            formattedText.style[randomFormat] = true;
-            formattedText.textContent = selectedText;
+    formatOptions.forEach(option => {
+        const button = document.createElement('button');
+        button.innerHTML = `<i class="fas fa-${option}"></i>`;
+        button.addEventListener('click', () => {
+            document.execCommand(option, false, null);
+            formatMenu.remove();
+            saveNotes();
+        });
+        formatMenu.appendChild(button);
+    });
 
-            range.deleteContents();
-            range.insertNode(formattedText);
-        }
-    }
+    noteContent.parentNode.appendChild(formatMenu);
+}
+
+function changeCategory(note) {
+    const categories = ['work', 'personal', 'ideas'];
+    const currentCategory = note.querySelector('.category-tag').textContent;
+    const newCategory = categories[(categories.indexOf(currentCategory) + 1) % categories.length];
+    note.querySelector('.category-tag').textContent = newCategory;
+    note.querySelector('.category-tag').className = `category-tag category-${newCategory}`;
     saveNotes();
 }
 
@@ -119,8 +141,11 @@ function dragStart(e) {
 
 function dragEnd(e) {
     e.target.style.opacity = '1';
-    e.target.style.left = `${e.clientX - e.target.offsetWidth / 2}px`;
-    e.target.style.top = `${e.clientY - e.target.offsetHeight / 2}px`;
+    const gridSize = 20;
+    const newX = Math.round(e.clientX / gridSize) * gridSize;
+    const newY = Math.round(e.clientY / gridSize) * gridSize;
+    e.target.style.left = `${newX}px`;
+    e.target.style.top = `${newY}px`;
     saveNotes();
 }
 
@@ -129,13 +154,18 @@ function saveNotes() {
         content: note.querySelector('.note-content').innerHTML,
         color: note.style.backgroundColor,
         x: parseInt(note.style.left, 10),
-        y: parseInt(note.style.top, 10)
+        y: parseInt(note.style.top, 10),
+        width: note.style.width,
+        height: note.style.height,
+        category: note.querySelector('.category-tag').textContent
     }));
     localStorage.setItem('notes', JSON.stringify(notesData));
 }
 
 function loadNotes() {
-    notes.forEach(note => createNote(note.content, note.color, note.x, note.y));
+    notes.forEach(note => {
+        createNote(note.content, note.color, note.x, note.y, '', note.category, note.width, note.height);
+    });
 }
 
 searchInput.addEventListener('input', () => {
