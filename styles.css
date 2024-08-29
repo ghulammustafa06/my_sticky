@@ -10,7 +10,7 @@
 
 .dark-mode {
     --primary-color: #bb86fc;
-    --secondary-color: #03dac6;
+    --secondary-color: #da034b;
     --bg-color: #121212;
     --note-color: #292929;
     --text-color: #e0e0e0;
@@ -241,4 +241,126 @@ h1 {
 
 .format-menu button:hover {
     color: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    #search-notes, #category-filter {
+        flex-grow: 1;
+    }
+
+    #notes-container {
+        grid-template-columns: 1fr;
+    }
+
+    .note {
+        min-height: 200px;
+    }
+
+    .note-content {
+        font-size: 1rem;
+    }
+
+    .note-actions button {
+        font-size: 1rem;
+    }   
+
+    .modal-content {
+        width: 80%;
+    }
+
+    .template-options {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .floating-button {
+        font-size: 1.2rem;
+        width: 40px;
+        height: 40px;
+    }
+
+    .format-menu {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .format-menu button {
+        font-size: 0.8rem;
+    }
+
+    #close-modal, #close-shortcut-guide {
+        margin-top: 1rem;
+    }
+
+    .category-tag {
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size:  rem;
+    }
+
+    .note-content {
+        font-size: 0.9rem;
+    }
+
+    .note-actions button {
+        font-size: 0.9rem;
+    }
+
+    .template {
+        padding: 0.5rem;
+    }
+
+    .floating-button {
+        font-size: 1rem;
+        width: 30px;
+        height: 30px;
+    }
+
+    .format-menu button {
+        font-size: 0.7rem;
+    }
+
+    .category-tag {
+        font-size: 0.5rem;
+    }
+
+    #close-modal, #close-shortcut-guide {
+        padding: 0.3rem 0.7rem;
+    }
+
+    .header-actions {
+        gap: 0.5rem;
+    }
+
+    #search-notes, #category-filter {
+        padding: 0.3rem;
+        font-size: 0.8rem;
+    }
+
+    #create-note, #toggle-dark-mode {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    .note {
+        padding: 1rem;
+    }
+
+    .note-actions button {
+        font-size: 0.8rem;
+    }
 }
