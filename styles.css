@@ -169,7 +169,7 @@ h1 {
     filter: brightness(110%);
 }
 
-#close-modal {
+#close-modal, #close-shortcut-guide {
     display: block;
     margin: 2rem auto 0;
     padding: 0.5rem 1rem;
@@ -181,7 +181,7 @@ h1 {
     transition: all 0.3s ease;
 }
 
-#close-modal:hover {
+#close-modal:hover, #close-shortcut-guide:hover {
     filter: brightness(110%);
 }
 
@@ -198,3 +198,47 @@ h1 {
 .category-work { background-color: #ff7eb9; }
 .category-personal { background-color: #7afcff; }
 .category-ideas { background-color: #feff9c; }
+
+.floating-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.floating-button:hover {
+    transform: scale(1.1);
+}
+
+.format-menu {
+    display: flex;
+    gap: 5px;
+    position: absolute;
+    background-color: var(--bg-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 10;
+}
+
+.format-menu button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.format-menu button:hover {
+    color: var(--secondary-color);
+}
