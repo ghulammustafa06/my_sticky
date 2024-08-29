@@ -5,15 +5,17 @@ const categoryFilter = document.getElementById('category-filter');
 const templatesModal = document.getElementById('templates-modal');
 const closeModalButton = document.getElementById('close-modal');
 const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
+const showShortcutGuideButton = document.getElementById('show-shortcut-guide');
+const shortcutGuideModal = document.getElementById('shortcut-guide');
+const closeShortcutGuideButton = document.getElementById('close-shortcut-guide');
 
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-function createNote(content = '', color = '#fff700', textColor = '#000000', x = 0, y = 0, width = '250px', height = '250px', template = '', category = '') {
+function createNote(content = '', color = '#fff700', x = 0, y = 0, template = '', category = '', width = '250px', height = '250px', textColor = '#000000') {
     const note = document.createElement('div');
     note.className = 'note';
     note.style.backgroundColor = color;
-    note.style.color = textColor;
     note.style.left = `${x}px`;
     note.style.top = `${y}px`;
     note.style.width = width;
@@ -29,7 +31,7 @@ function createNote(content = '', color = '#fff700', textColor = '#000000', x = 
     }
 
     note.innerHTML = `
-        <div class="note-content" contenteditable="true">${content || templateContent}</div>
+        <div class="note-content" contenteditable="true" style="color: ${textColor}">${content || templateContent}</div>
         <div class="note-actions">
             <button class="color-change"><i class="fas fa-palette"></i></button>
             <button class="text-color-change"><i class="fas fa-font"></i></button>
@@ -51,7 +53,6 @@ function createNote(content = '', color = '#fff700', textColor = '#000000', x = 
     note.style.resize = 'both';
     note.style.overflow = 'auto';
 
-
     const noteContent = note.querySelector('.note-content');
     const colorChangeButton = note.querySelector('.color-change');
     const textColorChangeButton = note.querySelector('.text-color-change');
@@ -61,7 +62,7 @@ function createNote(content = '', color = '#fff700', textColor = '#000000', x = 
 
     noteContent.addEventListener('input', saveNotes);
     colorChangeButton.addEventListener('click', () => changeColor(note));
-    textColorChangeButton.addEventListener('click', () => changeTextColor(note));
+    textColorChangeButton.addEventListener('click', () => changeTextColor(noteContent));
     formatButton.addEventListener('click', () => showFormatOptions(noteContent));
     changeCategoryButton.addEventListener('click', () => changeCategory(note));
     deleteButton.addEventListener('click', () => deleteNote(note));
@@ -81,7 +82,7 @@ closeModalButton.addEventListener('click', () => {
 
 document.querySelectorAll('.template').forEach(template => {
     template.addEventListener('click', () => {
-        createNote('', '#fff700', '#000000', 0, 0, '250px', '250px', template.dataset.template);
+        createNote('', '#fff700', 0, 0, template.dataset.template, 'work');
         templatesModal.style.display = 'none';
     });
 });
@@ -98,14 +99,14 @@ function changeColor(note) {
     });
 }
 
-function changeTextColor(note) {
+function changeTextColor(noteContent) {
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
-    colorPicker.value = note.style.color;
+    colorPicker.value = noteContent.style.color;
     colorPicker.click();
 
     colorPicker.addEventListener('change', () => {
-        note.style.color = colorPicker.value;
+        noteContent.style.color = colorPicker.value;
         saveNotes();
     });
 }
@@ -134,10 +135,19 @@ function showFormatOptions(noteContent) {
     noteContent.parentNode.appendChild(formatMenu);
 }
 
+function changeFontSize(noteContent, change) {
+    const currentSize = window.getComputedStyle(noteContent, null).getPropertyValue('font-size');
+    const newSize = parseInt(currentSize) + change;
+    noteContent.style.fontSize = `${newSize}px`;
+    saveNotes();
+}
+
 function changeCategory(note) {
     const categories = ['work', 'personal', 'ideas'];
     const currentCategory = note.querySelector('.category-tag').textContent;
-    const newCategory = categories[(categories.indexOf(currentCategory) + 1) % categories.length];
+    const newCategoryIndex = (categories.indexOf(currentCategory) + 1) % categories.length;
+    const newCategory = categories[newCategoryIndex];
+
     note.querySelector('.category-tag').textContent = newCategory;
     note.querySelector('.category-tag').className = `category-tag category-${newCategory}`;
     saveNotes();
@@ -153,37 +163,42 @@ function deleteNote(note) {
 
 function dragStart(e) {
     e.dataTransfer.setData('text/plain', e.target.id);
-    setTimeout(() => (e.target.style.opacity = '0.5'), 0);
+    e.target.style.opacity = '0.5';
 }
 
 function dragEnd(e) {
     e.target.style.opacity = '1';
-    const gridSize = 20;
-    const newX = Math.round(e.clientX / gridSize) * gridSize;
-    const newY = Math.round(e.clientY / gridSize) * gridSize;
-    e.target.style.left = `${newX}px`;
-    e.target.style.top = `${newY}px`;
     saveNotes();
 }
 
+notesContainer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+});
+
+notesContainer.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const noteId = e.dataTransfer.getData('text');
+    const note = document.getElementById(noteId);
+    note.style.left = `${e.clientX - note.offsetWidth / 2}px`;
+    note.style.top = `${e.clientY - note.offsetHeight / 2}px`;
+});
+
 function saveNotes() {
-    const notesData = Array.from(document.querySelectorAll('.note')).map(note => ({
+    notes = Array.from(notesContainer.children).map(note => ({
         content: note.querySelector('.note-content').innerHTML,
         color: note.style.backgroundColor,
-        textColor: note.style.color,
-        x: parseInt(note.style.left, 10),
-        y: parseInt(note.style.top, 10),
+        x: note.style.left,
+        y: note.style.top,
         width: note.style.width,
         height: note.style.height,
+        textColor: note.querySelector('.note-content').style.color,
         category: note.querySelector('.category-tag').textContent
     }));
-    localStorage.setItem('notes', JSON.stringify(notesData));
+    localStorage.setItem('notes', JSON.stringify(notes));
 }
 
 function loadNotes() {
-    notes.forEach(note => {
-        createNote(note.content, note.color, note.textColor, note.x, note.y, note.width, note.height, '', note.category);
-    });
+    notes.forEach(note => createNote(note.content, note.color, note.x, note.y, '', note.category, note.width, note.height, note.textColor));
 }
 
 searchInput.addEventListener('input', filterNotes);
@@ -193,13 +208,12 @@ function filterNotes() {
     const searchTerm = searchInput.value.toLowerCase();
     const selectedCategory = categoryFilter.value;
 
-    document.querySelectorAll('.note').forEach(note => {
-        const noteContent = note.querySelector('.note-content').textContent.toLowerCase();
-        const noteCategory = note.querySelector('.category-tag').textContent;
-        const matchesSearch = noteContent.includes(searchTerm);
-        const matchesCategory = selectedCategory === '' || noteCategory === selectedCategory;
-
-        note.style.display = matchesSearch && matchesCategory ? 'flex' : 'none';
+    Array.from(notesContainer.children).forEach(note => {
+        const content = note.querySelector('.note-content').textContent.toLowerCase();
+        const category = note.querySelector('.category-tag').textContent;
+        const matchesSearch = content.includes(searchTerm);
+        const matchesCategory = selectedCategory === '' || category === selectedCategory;
+        note.style.display = matchesSearch && matchesCategory ? 'block' : 'none';
     });
 }
 
@@ -209,15 +223,29 @@ toggleDarkModeButton.addEventListener('click', () => {
     localStorage.setItem('darkMode', isDarkMode);
 });
 
-if (isDarkMode) {
-    document.body.classList.add('dark-mode');
-}
+showShortcutGuideButton.addEventListener('click', () => {
+    shortcutGuideModal.style.display = 'block';
+});
+
+closeShortcutGuideButton.addEventListener('click', () => {
+    shortcutGuideModal.style.display = 'none';
+});
 
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
         showTemplatesModal();
+    } else if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        searchInput.focus();
+    } else if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        toggleDarkModeButton.click();
+    } else if (e.key === 'Escape') {
+        templatesModal.style.display = 'none';
+        shortcutGuideModal.style.display = 'none';
     }
 });
 
 loadNotes();
+document.body.classList.toggle('dark-mode', isDarkMode);
