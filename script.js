@@ -9,10 +9,11 @@ const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-function createNote(content = '', color = '#fff700', x = 0, y = 0, template = '', category = '', width = '250px', height = '250px') {
+function createNote(content = '', color = '#fff700', textColor = '#000000', x = 0, y = 0, width = '250px', height = '250px', template = '', category = '') {
     const note = document.createElement('div');
     note.className = 'note';
     note.style.backgroundColor = color;
+    note.style.color = textColor;
     note.style.left = `${x}px`;
     note.style.top = `${y}px`;
     note.style.width = width;
@@ -31,7 +32,8 @@ function createNote(content = '', color = '#fff700', x = 0, y = 0, template = ''
         <div class="note-content" contenteditable="true">${content || templateContent}</div>
         <div class="note-actions">
             <button class="color-change"><i class="fas fa-palette"></i></button>
-            <button class="format-note"><i class="fas fa-font"></i></button>
+            <button class="text-color-change"><i class="fas fa-font"></i></button>
+            <button class="format-note"><i class="fas fa-heading"></i></button>
             <button class="change-category"><i class="fas fa-tag"></i></button>
             <button class="delete-note"><i class="fas fa-trash"></i></button>
         </div>
@@ -42,24 +44,24 @@ function createNote(content = '', color = '#fff700', x = 0, y = 0, template = ''
     
     note.style.animation = 'fadeIn 0.5s';
 
-    // Make the note draggable
     note.draggable = true;
     note.addEventListener('dragstart', dragStart);
     note.addEventListener('dragend', dragEnd);
 
-    // Make the note resizable
     note.style.resize = 'both';
     note.style.overflow = 'auto';
 
-    // Add event listeners for editing, color change, formatting, category change, and deletion
+
     const noteContent = note.querySelector('.note-content');
     const colorChangeButton = note.querySelector('.color-change');
+    const textColorChangeButton = note.querySelector('.text-color-change');
     const formatButton = note.querySelector('.format-note');
     const changeCategoryButton = note.querySelector('.change-category');
     const deleteButton = note.querySelector('.delete-note');
 
     noteContent.addEventListener('input', saveNotes);
     colorChangeButton.addEventListener('click', () => changeColor(note));
+    textColorChangeButton.addEventListener('click', () => changeTextColor(note));
     formatButton.addEventListener('click', () => showFormatOptions(noteContent));
     changeCategoryButton.addEventListener('click', () => changeCategory(note));
     deleteButton.addEventListener('click', () => deleteNote(note));
@@ -79,7 +81,7 @@ closeModalButton.addEventListener('click', () => {
 
 document.querySelectorAll('.template').forEach(template => {
     template.addEventListener('click', () => {
-        createNote('', '#fff700', 0, 0, template.dataset.template, 'work');
+        createNote('', '#fff700', '#000000', 0, 0, '250px', '250px', template.dataset.template);
         templatesModal.style.display = 'none';
     });
 });
@@ -92,6 +94,18 @@ function changeColor(note) {
 
     colorPicker.addEventListener('change', () => {
         note.style.backgroundColor = colorPicker.value;
+        saveNotes();
+    });
+}
+
+function changeTextColor(note) {
+    const colorPicker = document.createElement('input');
+    colorPicker.type = 'color';
+    colorPicker.value = note.style.color;
+    colorPicker.click();
+
+    colorPicker.addEventListener('change', () => {
+        note.style.color = colorPicker.value;
         saveNotes();
     });
 }
@@ -156,6 +170,7 @@ function saveNotes() {
     const notesData = Array.from(document.querySelectorAll('.note')).map(note => ({
         content: note.querySelector('.note-content').innerHTML,
         color: note.style.backgroundColor,
+        textColor: note.style.color,
         x: parseInt(note.style.left, 10),
         y: parseInt(note.style.top, 10),
         width: note.style.width,
@@ -167,7 +182,7 @@ function saveNotes() {
 
 function loadNotes() {
     notes.forEach(note => {
-        createNote(note.content, note.color, note.x, note.y, '', note.category, note.width, note.height);
+        createNote(note.content, note.color, note.textColor, note.x, note.y, note.width, note.height, '', note.category);
     });
 }
 
@@ -188,23 +203,15 @@ function filterNotes() {
     });
 }
 
-toggleDarkModeButton.addEventListener('click', toggleDarkMode);
-
-function toggleDarkMode() {
+toggleDarkModeButton.addEventListener('click', () => {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark-mode', isDarkMode);
     localStorage.setItem('darkMode', isDarkMode);
-    updateDarkModeButton();
-}
-
-function updateDarkModeButton() {
-    toggleDarkModeButton.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-}
+});
 
 if (isDarkMode) {
     document.body.classList.add('dark-mode');
 }
-updateDarkModeButton();
 
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'n') {
@@ -212,18 +219,5 @@ document.addEventListener('keydown', (e) => {
         showTemplatesModal();
     }
 });
-
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeOut {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(20px); }
-    }
-`;
-document.head.appendChild(style);
 
 loadNotes();

@@ -12,7 +12,14 @@
         <h1>My Sticky</h1>
         <div class="header-actions">
             <input type="text" id="search-notes" placeholder="Search notes...">
+            <select id="category-filter">
+                <option value="">All Categories</option>
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+                <option value="ideas">Ideas</option>
+            </select>
             <button id="create-note"><i class="fas fa-plus"></i> New Note</button>
+            <button id="toggle-dark-mode"><i class="fas fa-moon"></i></button>
         </div>
     </header>
     <main id="notes-container"></main>
