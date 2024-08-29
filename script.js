@@ -42,13 +42,16 @@ function createNote(content = '', color = '#fff700', x = 0, y = 0, template = ''
     
     note.style.animation = 'fadeIn 0.5s';
 
+    // Make the note draggable
     note.draggable = true;
     note.addEventListener('dragstart', dragStart);
     note.addEventListener('dragend', dragEnd);
 
+    // Make the note resizable
     note.style.resize = 'both';
     note.style.overflow = 'auto';
 
+    // Add event listeners for editing, color change, formatting, category change, and deletion
     const noteContent = note.querySelector('.note-content');
     const colorChangeButton = note.querySelector('.color-change');
     const formatButton = note.querySelector('.format-note');
@@ -168,15 +171,40 @@ function loadNotes() {
     });
 }
 
-searchInput.addEventListener('input', () => {
+searchInput.addEventListener('input', filterNotes);
+categoryFilter.addEventListener('change', filterNotes);
+
+function filterNotes() {
     const searchTerm = searchInput.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+
     document.querySelectorAll('.note').forEach(note => {
         const noteContent = note.querySelector('.note-content').textContent.toLowerCase();
-        note.style.display = noteContent.includes(searchTerm) ? 'flex' : 'none';
-    });
-});
+        const noteCategory = note.querySelector('.category-tag').textContent;
+        const matchesSearch = noteContent.includes(searchTerm);
+        const matchesCategory = selectedCategory === '' || noteCategory === selectedCategory;
 
-loadNotes();
+        note.style.display = matchesSearch && matchesCategory ? 'flex' : 'none';
+    });
+}
+
+toggleDarkModeButton.addEventListener('click', toggleDarkMode);
+
+function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    localStorage.setItem('darkMode', isDarkMode);
+    updateDarkModeButton();
+}
+
+function updateDarkModeButton() {
+    toggleDarkModeButton.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+
+if (isDarkMode) {
+    document.body.classList.add('dark-mode');
+}
+updateDarkModeButton();
 
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'n') {
@@ -197,3 +225,5 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+loadNotes();
